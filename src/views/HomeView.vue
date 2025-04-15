@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import IndexPage from "../components/IndexPage.vue";
+import GuestPage from "../components/GuestPage.vue";
+import { useAuthStore } from "../stores/auth";
+
+const authStore = useAuthStore();
+
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <IndexPage v-if="authStore.userLoggedIn === true" />
+    <GuestPage v-else />
   </main>
 </template>
