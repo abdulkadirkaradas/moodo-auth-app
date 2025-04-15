@@ -1,6 +1,16 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { useAuthStore } from './stores/auth';
+
+const authStore = useAuthStore();
+let handleLogout: () => void;
+
+onMounted(() => {
+  handleLogout = () => {
+    authStore.setUserLoginStatus(false);
+  };
+});
 </script>
 
 <template>
@@ -8,16 +18,16 @@ import HelloWorld from './components/HelloWorld.vue'
     <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <router-link to="/">Home</router-link>
+        <router-link v-show="authStore.userLoggedIn === false" to="/login">Login</router-link>
+        <router-link v-show="authStore.userLoggedIn === false" to="/register">Register</router-link>
+        <span v-show="authStore.userLoggedIn === true" @click="handleLogout"><a href="#">Logout</a></span>
       </nav>
     </div>
   </header>
 
-  <RouterView />
+  <router-view />
 </template>
 
 <style scoped>
@@ -36,6 +46,7 @@ nav {
   font-size: 12px;
   text-align: center;
   margin-top: 2rem;
+  display: flex;
 }
 
 nav a.router-link-exact-active {
@@ -61,6 +72,9 @@ nav a:first-of-type {
     display: flex;
     place-items: center;
     padding-right: calc(var(--section-gap) / 2);
+    position: absolute;
+    top: 30px;
+    left: 30px;
   }
 
   .logo {
