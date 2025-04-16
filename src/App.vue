@@ -1,13 +1,20 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { RouterLink, RouterView } from 'vue-router'
+import { inject, onMounted } from 'vue';
 import { useAuthStore } from './stores/auth';
 
 const authStore = useAuthStore();
+const moodo = inject('moodo');
+moodo.Services.client.setStorageType({
+  storage: 'localStorage'
+});
+const storage = moodo.Services.client.getStorage('storage');
+
 let handleLogout: () => void;
 
 onMounted(() => {
   handleLogout = () => {
+    storage.remove('accessToken');
+    storage.remove('refreshToken');
     authStore.setUserLoginStatus(false);
   };
 });
