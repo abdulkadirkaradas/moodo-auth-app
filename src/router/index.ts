@@ -19,6 +19,11 @@ const router = createRouter({
       name: 'register',
       component: () => import('../components/RegisterPage.vue'),
     },
+    {
+      path: '/refresh-token',
+      name: 'refreshToken',
+      component: () => import('../components/RefreshTokenPage.vue'),
+    }
   ],
 })
 
