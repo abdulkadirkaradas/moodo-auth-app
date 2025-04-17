@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { inject, onMounted, useTemplateRef } from 'vue';
+import type { IStorage } from 'moodo/dist/interfaces/storage';
 
 const moodo = inject('moodo');
 const clientService = moodo.Services;
+let storage: IStorage;
 
-clientService.client.setStorageType({
-  tokenStorage: 'localStorage'
-});
-const storage = clientService.client.getStorage('tokenStorage');
+try {
+  storage = clientService.client.getStorage('tokenStorage');
+} catch (error) {
+  console.error(error);
+  clientService.client.setStorageType({
+    tokenStorage: 'localStorage'
+  });
+  storage = clientService.client.getStorage('tokenStorage');
+}
 
 const newAT = useTemplateRef<HTMLPreElement>('newAT');
 const newRT = useTemplateRef<HTMLPreElement>('newRT');
