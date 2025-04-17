@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, useTemplateRef } from 'vue';
+import { inject, onMounted } from 'vue';
 import { useAuthStore } from './stores/auth';
 
 const authStore = useAuthStore();
@@ -7,55 +7,17 @@ const moodo = inject('moodo');
 const clientService = moodo.Services;
 
 clientService.client.setStorageType({
-  storage: 'localStorage'
+  mainStorage: 'localStorage'
 });
-const storage = clientService.client.getStorage('storage');
-
-const newAT = useTemplateRef<HTMLPreElement>('newAT');
-const newRT = useTemplateRef<HTMLPreElement>('newRT');
-const prevAT = useTemplateRef<HTMLPreElement>('prevAT');
-const prevRT = useTemplateRef<HTMLPreElement>('prevRT');
+const storage = clientService.client.getStorage('mainStorage');
 
 let handleLogout: () => void;
-let handleRefreshTokens: () => Promise<void>;
-const showTokensDiv = ref(false);
 
 onMounted(() => {
   handleLogout = () => {
     storage.remove('accessToken');
     storage.remove('refreshToken');
     authStore.setUserLoginStatus(false);
-  };
-
-  handleRefreshTokens = async () => {
-    const previousAT = storage.get('accessToken');
-    const previousRT = storage.get('refreshToken');
-
-    const response = await clientService.client.auth.refreshToken({
-      url: "/auth/refresh-token",
-      data: {
-        refreshToken: storage.get('refreshToken')
-      }
-    });
-
-    if (response.data) {
-      showTokensDiv.value = true;
-      if (prevAT.value && prevRT.value) {
-        prevAT.value.style.display = "block";
-        prevRT.value.style.display = "block";
-
-        prevAT.value.innerText = previousAT;
-        prevRT.value.innerText = previousRT;
-      }
-
-      if (newAT.value && newRT.value) {
-        newAT.value.style.display = "block";
-        newRT.value.style.display = "block";
-
-        newAT.value.innerText = response.data.access_token;
-        newRT.value.innerText = response.data.refresh_token;
-      }
-    }
   };
 });
 </script>
@@ -69,33 +31,16 @@ onMounted(() => {
         <router-link to="/">Home</router-link>
         <router-link v-show="authStore.userLoggedIn === false" to="/login">Login</router-link>
         <router-link v-show="authStore.userLoggedIn === false" to="/register">Register</router-link>
-        <span v-show="authStore.userLoggedIn === true" @click="handleLogout"><a href="#">Logout</a></span>
-        <span v-show="authStore.userLoggedIn === true" @click="handleRefreshTokens">
-          <a href="#">Refresh Tokens</a>
+        <router-link v-show="authStore.userLoggedIn === true" to="/storage-service">Storage Services</router-link>
+        <router-link v-show="authStore.userLoggedIn === true" to="/refresh-token">Refresh Token</router-link>
+        <span class="menu-link" v-show="authStore.userLoggedIn === true" @click="handleLogout">
+          <a href="#">Logout</a>
         </span>
       </nav>
     </div>
   </header>
 
   <router-view />
-  <br>
-  <div class="token-field" v-if="authStore.userLoggedIn === true">
-    <span>
-      <span>Exist Access Token;</span>
-      <pre class="previousAT" ref="prevAT"></pre>
-      <br>
-      <span>Exist Refresh Token;</span>
-      <pre class="previousRT" ref="prevRT"></pre>
-    </span>
-    <br>
-    <span>
-      <span>New Access Token;</span>
-      <pre class="newAToken" ref="newAT"></pre>
-      <br>
-      <span>New Refresh Token;</span>
-      <pre class="newRToken" ref="newRT"></pre>
-    </span>
-  </div>
 </template>
 
 <style scoped>
@@ -135,14 +80,10 @@ nav a:first-of-type {
   border: 0;
 }
 
-.token-field,
-.token-field pre {
-  border: 1px dotted white;
-  padding: 10px;
-}
-
-.token-field span {
-  font-weight: 700;
+nav .menu-link a {
+  display: inline-block;
+  padding: 0 1rem;
+  border-left: 1px solid var(--color-border);
 }
 
 @media (min-width: 1024px) {
